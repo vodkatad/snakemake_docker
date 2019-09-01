@@ -176,7 +176,7 @@ class Snakemake:
         self.rule = rulename
         self.bench_iteration = bench_iteration
         self.scriptdir = scriptdir
-
+        
     def log_fmt_shell(self, stdout=True, stderr=True, append=False):
         """
         Return a shell redirection string to be used in `shell()` calls
@@ -266,6 +266,7 @@ def get_source(path, basedir=None):
 
 def script(path, basedir, input, output, params, wildcards, threads, resources,
            log, config, rulename, conda_env, singularity_img, singularity_args,
+           docker_img, docker_arg,
            bench_record, jobid, bench_iteration, shadow_dir):
     """
     Load a script from the given basedir + path and execute it.
@@ -454,7 +455,7 @@ def script(path, basedir, input, output, params, wildcards, threads, resources,
                                     "because the script uses data structures from "
                                     "Snakemake which are Python >={0}.{1} "
                                     "only.".format(*MIN_PY_VERSION))
-            if singularity_img is not None:
+            if singularity_img or docker_img is not None:
                 # use python from image
                 py_exec = "python"
             # use the same Python as the running process or the one from the environment

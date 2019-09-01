@@ -114,6 +114,8 @@ def snakemake(snakefile,
               use_conda=False,
               use_singularity=False,
               singularity_args="",
+              use_docker=False,
+              docker_args="",
               conda_prefix=None,
               list_conda_envs=False,
               singularity_prefix=None,
@@ -210,7 +212,9 @@ def snakemake(snakefile,
         force_use_threads:          whether to force use of threads over processes. helpful if shared memory is full or unavailable (default False)
         use_conda (bool):           create conda environments for each job (defined with conda directive of rules)
         use_singularity (bool):     run jobs in singularity containers (if defined with singularity directive)
+        use_docker (bool):          run jobs in docker containers (if defined with docker_img directive)
         singularity_args (str):     additional arguments to pass to singularity
+        docker_args (str):     additional arguments to pass to docker
         conda_prefix (str):         the directory in which conda environments will be created (default None)
         singularity_prefix (str):   the directory to which singularity images will be pulled (default None)
         shadow_prefix (str):        prefix for shadow directories. The job-specific shadow directories will be created in $SHADOW_PREFIX/shadow/ (default None)
@@ -392,6 +396,8 @@ def snakemake(snakefile,
                         singularity_prefix=singularity_prefix,
                         shadow_prefix=shadow_prefix,
                         singularity_args=singularity_args,
+                        use_docker = use_docker,
+                        docker_args = docker_args,
                         mode=mode,
                         wrapper_prefix=wrapper_prefix,
                         printshellcmds=printshellcmds,
@@ -468,6 +474,8 @@ def snakemake(snakefile,
                                        singularity_prefix=singularity_prefix,
                                        shadow_prefix=shadow_prefix,
                                        singularity_args=singularity_args,
+                                       use_docker=use_docker,
+                                       docker_args=docker_args,
                                        list_conda_envs=list_conda_envs,
                                        kubernetes=kubernetes,
                                        kubernetes_envvars=kubernetes_envvars,
@@ -1377,6 +1385,20 @@ def get_argument_parser(profile=None):
         default="",
         metavar="ARGS",
         help="Pass additional args to singularity.")
+
+    group_docker = parser.add_argument_group("DOCKER")
+
+    group_docker.add_argument(
+        "--use-docker",
+        action="store_true",
+        help="If defined in the rule, run job within a docker container. "
+        "If this flag is not set, the docker directive is ignored."
+    )
+    group_docker.add_argument(
+        "--docker-args",
+        default="",
+        metavar="ARGS",
+        help="Pass additional args to docker.")
     return parser
 
 
@@ -1460,6 +1482,16 @@ def main(argv=None):
 
     if args.singularity_prefix and not args.use_singularity:
         print("Error: --use_singularity must be set if --singularity-prefix "
+              "is set.", file=sys.stderr)
+        sys.exit(1)
+
+    if (args.use_singularity or args.kubernetes) and args.use_docker:
+        print("Error: --use_singularity or --kubernetes cannot be used with --use_docker "
+              "is set.", file=sys.stderr)
+        sys.exit(1)
+    
+    if args.docker_args and not args.use_docker:
+        print("Error: --use_docker must be set if --singularity-prefix "
               "is set.", file=sys.stderr)
         sys.exit(1)
 
@@ -1614,6 +1646,8 @@ def main(argv=None):
                             singularity_prefix=args.singularity_prefix,
                             shadow_prefix=args.shadow_prefix,
                             singularity_args=args.singularity_args,
+                            use_docker=args.use_docker,
+                            docker_args=args.docker_args,
                             create_envs_only=args.create_envs_only,
                             mode=args.mode,
                             wrapper_prefix=args.wrapper_prefix,

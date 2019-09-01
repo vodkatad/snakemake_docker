@@ -14,6 +14,7 @@ import threading
 from snakemake.utils import format
 from snakemake.logging import logger
 from snakemake import singularity
+from snakemake import docker
 from snakemake.conda import Conda
 import snakemake
 
@@ -96,8 +97,11 @@ class shell:
         env_prefix = ""
         conda_env = context.get("conda_env", None)
         singularity_img = context.get("singularity_img", None)
+        docker_img = context.get("docker_img", None)
         shadow_dir = context.get("shadow_dir", None)
-
+        print("vodka")
+        print(docker_img)
+        print(singularity_img)
         cmd = "{} {} {}".format(
                             cls._process_prefix,
                             cmd.strip(),
@@ -115,6 +119,14 @@ class shell:
                 container_workdir=shadow_dir)
             logger.info(
                 "Activating singularity image {}".format(singularity_img))
+        if docker_img:
+            args = context.get("docker_args", "")
+            cmd = docker.shellcmd(
+                docker_img, cmd, args,
+                shell_executable=cls._process_args["executable"],
+                container_workdir=shadow_dir) # WTF TODO is shadow_dir
+            logger.info(
+                "Activating docker image {}".format(docker_img))
         if conda_env:
             logger.info("Activating conda environment: {}".format(conda_env))
 

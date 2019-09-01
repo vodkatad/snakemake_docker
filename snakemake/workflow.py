@@ -53,6 +53,8 @@ class Workflow:
                  use_singularity=False,
                  singularity_prefix=None,
                  singularity_args="",
+                 use_docker=False,
+                 docker_args="",
                  shadow_prefix=None,
                  mode=Mode.default,
                  wrapper_prefix=None,
@@ -101,6 +103,8 @@ class Workflow:
         self.use_singularity = use_singularity
         self.singularity_prefix = singularity_prefix
         self.singularity_args = singularity_args
+        self.use_docker = use_docker
+        self.docker_args = docker_args
         self.shadow_prefix = shadow_prefix
         self.global_singularity_img = None
         self.mode = mode
@@ -577,6 +581,7 @@ class Workflow:
             dag.list_untracked()
             return True
 
+        # For shared_fs we pull images now, otherwise when it has been spawned to nodes (? when)
         if self.use_singularity:
             if assume_shared_fs:
                 dag.pull_singularity_imgs(dryrun=dryrun or list_conda_envs,
@@ -658,6 +663,10 @@ class Workflow:
                                                     for rule in self.rules):
                     logger.info("Singularity containers: ignored")
 
+                if not self.use_docker and any(rule.docker_img
+                                                    for rule in self.rules):
+                    logger.info("Docker images: ignored")
+
                 logger.run_info("\n".join(dag.stats()))
             else:
                 logger.info("Nothing to be done.")
@@ -738,7 +747,8 @@ class Workflow:
 
         if print_compilation:
             print(code)
-
+        print(code)
+        
         # insert the current directory into sys.path
         # this allows to import modules from the workflow directory
         sys.path.insert(0, os.path.dirname(snakefile))
@@ -894,6 +904,19 @@ class Workflow:
                         # skip rules with run directive
                         rule.singularity_img = self.global_singularity_img
 
+            if self.use_docker:
+                invalid_rule = not (ruleinfo.script or ruleinfo.shellcmd)
+                if ruleinfo.docker_img:
+                    if invalid_rule:
+                        raise RuleException("docker_img directive is only allowed "
+                            "with shell or script directives "
+                            "(not with run/wrapper).", rule=rule)
+                    rule.docker_img = ruleinfo.docker_img
+                #elif self.global_singularity_img:
+                #    if not invalid_rule:
+                #        # skip rules with run directive
+                #        rule.singularity_img = self.global_singularity_img           
+
             rule.norun = ruleinfo.norun
             rule.docstring = ruleinfo.docstring
             rule.run_func = ruleinfo.func
@@ -972,6 +995,13 @@ class Workflow:
     def singularity(self, singularity_img):
         def decorate(ruleinfo):
             ruleinfo.singularity_img = singularity_img
+            return ruleinfo
+
+        return decorate
+
+    def docker_img(self, docker_img):
+        def decorate(ruleinfo):
+            ruleinfo.docker_img = docker_img
             return ruleinfo
 
         return decorate
@@ -1083,6 +1113,7 @@ class RuleInfo:
         self.benchmark = None
         self.conda_env = None
         self.singularity_img = None
+        self.docker_img = None
         self.wildcard_constraints = None
         self.threads = None
         self.shadow_depth = None

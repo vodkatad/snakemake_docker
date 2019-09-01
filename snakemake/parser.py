@@ -412,9 +412,13 @@ class Conda(RuleKeywordState):
     pass
 
 
+# STUDY
 class Singularity(RuleKeywordState):
     pass
 
+# STUDY
+class Docker_img(RuleKeywordState):
+    pass
 
 class Group(RuleKeywordState):
     pass
@@ -443,8 +447,9 @@ class Run(RuleKeywordState):
         yield "\n"
         yield ("def __rule_{rulename}(input, output, params, wildcards, threads, "
                "resources, log, version, rule, conda_env, singularity_img, "
-               "singularity_args, use_singularity, bench_record, jobid, "
-               "is_shell, bench_iteration, shadow_dir):".format(
+               "singularity_args, use_singularity, docker_img, docker_args, "
+               "use_docker, bench_record, jobid, "
+                "is_shell, bench_iteration, shadow_dir):".format(
                    rulename=self.rulename
                             if self.rulename is not None
                             else self.snakefile.rulecount))
@@ -551,7 +556,7 @@ class Script(AbstractCmd):
         # other args
         yield (", input, output, params, wildcards, threads, resources, log, "
                "config, rule, conda_env, singularity_img, singularity_args, "
-               "bench_record, jobid, bench_iteration, shadow_dir")
+               "bench_record, jobid, bench_iteration, shadow_dir, docker_img, docker_args")
 
 
 class Wrapper(Script):
@@ -591,6 +596,7 @@ class Rule(GlobalKeywordState):
                        benchmark=Benchmark,
                        conda=Conda,
                        singularity=Singularity,
+                       docker_img = Docker_img,
                        wildcard_constraints=WildcardConstraints,
                        shadow=Shadow,
                        group=Group,

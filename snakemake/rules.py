@@ -55,6 +55,7 @@ class Rule:
             self._benchmark = None
             self._conda_env = None
             self._singularity_img = None
+            self._docker_img = None
             self.group = None
             self._wildcard_names = None
             self.lineno = lineno
@@ -94,6 +95,7 @@ class Rule:
             self._benchmark = other._benchmark
             self._conda_env = other._conda_env
             self._singularity_img = other._singularity_img
+            self._docker_img = other._docker_img
             self.group = other.group
             self._wildcard_names = (set(other._wildcard_names)
                                     if other._wildcard_names is not None
@@ -238,6 +240,14 @@ class Rule:
     @singularity_img.setter
     def singularity_img(self, singularity_img):
         self._singularity_img = singularity_img
+
+    @property
+    def docker_img(self):
+        return self._docker_img
+
+    @docker_img.setter
+    def docker_img(self, docker_img):
+        self._docker_img = docker_img
 
     @property
     def input(self):
@@ -959,3 +969,4 @@ class RuleProxy:
         for i in range(len(files)):
             files[i] = IOFile(files[i], rule=self.rule)
         return files
+

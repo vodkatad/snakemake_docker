@@ -263,6 +263,15 @@ class CPUExecutor(RealExecutor):
                 self.exec_job += " --singularity-args \"{}\"".format(
                     self.workflow.singularity_args)
 
+        if self.workflow.use_docker:
+            self.exec_job += " --use-docker "
+            #if self.workflow.singularity_prefix:
+            #    self.exec_job += " --singularity-prefix {} ".format(
+            #        self.workflow.singularity_prefix)
+            if self.workflow.docker_args:
+                self.exec_job += " --docker-args \"{}\"".format(
+                    self.workflow.docker_args)
+
         self.use_threads = use_threads
         self.cores = cores
         self.pool = concurrent.futures.ThreadPoolExecutor(max_workers=workers + 1)
@@ -298,7 +307,9 @@ class CPUExecutor(RealExecutor):
                 benchmark_repeats, conda_env, singularity_img,
                 self.workflow.singularity_args, self.workflow.use_singularity,
                 self.workflow.linemaps, self.workflow.debug,
-                job.shadow_dir, job.jobid)
+                job.shadow_dir, job.jobid, 
+                job.docker_img, self.workflow.docker_args, self.workflow.use_docker)
+                # y singularity_img is in job and not in workflow? where is job?
 
     def run_single_job(self, job):
         if self.use_threads or (not job.is_shadow and not job.is_run):
@@ -454,6 +465,16 @@ class ClusterExecutor(RealExecutor):
             if self.workflow.singularity_args:
                 self.exec_job += " --singularity-args \"{}\"".format(
                     self.workflow.singularity_args)
+
+        if self.workflow.use_docker:
+            self.exec_job += " --use-docker "
+            #if self.workflow.singularity_prefix:
+            #    self.exec_job += " --singularity-prefix {} ".format(
+            #        self.workflow.singularity_prefix)
+            if self.workflow.docker_args:
+                self.exec_job += " --docker-args \"{}\"".format(
+                    self.workflow.docker_args)
+
 
         self.exec_job += self.get_default_remote_provider_args()
         self.jobname = jobname
@@ -1356,7 +1377,7 @@ class KubernetesExecutor(ClusterExecutor):
 def run_wrapper(job_rule, input, output, params, wildcards, threads, resources, log,
                 benchmark, benchmark_repeats, conda_env, singularity_img,
                 singularity_args, use_singularity, linemaps, debug,
-                shadow_dir, jobid):
+                shadow_dir, jobid, docker_img, docker_args, use_docker):
     """
     Wrapper around the run method that handles exceptions and benchmarking.
 
@@ -1406,7 +1427,8 @@ def run_wrapper(job_rule, input, output, params, wildcards, threads, resources, 
                         bench_record = BenchmarkRecord()
                         run(input, output, params, wildcards, threads, resources,
                             log, version, rule, conda_env, singularity_img,
-                            singularity_args, use_singularity, bench_record,
+                            singularity_args, use_singularity, docker_img, docker_args,
+                            use_docker, bench_record,
                             jobid, is_shell, bench_iteration, passed_shadow_dir)
                     else:
                         # The benchmarking is started here as we have a run section
@@ -1415,7 +1437,8 @@ def run_wrapper(job_rule, input, output, params, wildcards, threads, resources, 
                         with benchmarked() as bench_record:
                             run(input, output, params, wildcards, threads, resources,
                                 log, version, rule, conda_env, singularity_img,
-                                singularity_args, use_singularity,
+                                singularity_args, use_singularity, docker_img, docker_args,
+                                use_docker, 
                                 bench_record, jobid, is_shell, bench_iteration,
                                 passed_shadow_dir)
                     # Store benchmark record for this iteration
@@ -1423,7 +1446,8 @@ def run_wrapper(job_rule, input, output, params, wildcards, threads, resources, 
             else:
                 run(input, output, params, wildcards, threads, resources,
                     log, version, rule, conda_env, singularity_img,
-                    singularity_args, use_singularity, None, jobid, is_shell, None,
+                    singularity_args, use_singularity, docker_img, docker_args,
+                    use_docker, None, jobid, is_shell, None,
                     passed_shadow_dir)
     except (KeyboardInterrupt, SystemExit) as e:
         # Re-raise the keyboard interrupt in order to record an error in the

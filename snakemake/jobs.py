@@ -259,6 +259,14 @@ class Job(AbstractJob):
             return self.conda_env.create_archive()
         return None
 
+    @property 
+    def needs_docker(self):
+        return self.docker_img is not None
+
+    @property
+    def docker_img(self):
+        return self.rule.docker_img
+    
     @property
     def needs_singularity(self):
         return self.singularity_img is not None
