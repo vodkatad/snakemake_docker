@@ -117,9 +117,11 @@ def shellcmd(img_path, cmd, args="", envvars=None,
     # TODO we need to mount current dir or do we leave it to the user? user for now, need to mount whole bioinfo_root/equivalent
     wd = os.getcwd() # this won't work for subworkflows? TODO
     print("*********************",wd)
+    args += " --user {}:{} ".format(os.getuid(), os.getgid())
     cmd = "cd {};".format(wd) + cmd;
     cmd = "docker run {} {} {} -c '{}'".format(
         args, img_path, shell_executable,
         cmd.replace("'", r"'\''"))
     logger.debug(cmd)
     return cmd
+
