@@ -1491,7 +1491,7 @@ def main(argv=None):
         sys.exit(1)
     
     if args.docker_args and not args.use_docker:
-        print("Error: --use_docker must be set if --singularity-prefix "
+        print("Error: --use_docker must be set if --docker_args "
               "is set.", file=sys.stderr)
         sys.exit(1)
 

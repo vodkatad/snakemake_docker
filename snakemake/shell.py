@@ -99,9 +99,6 @@ class shell:
         singularity_img = context.get("singularity_img", None)
         docker_img = context.get("docker_img", None)
         shadow_dir = context.get("shadow_dir", None)
-        print("vodka")
-        print(docker_img)
-        print(singularity_img)
         cmd = "{} {} {}".format(
                             cls._process_prefix,
                             cmd.strip(),
@@ -124,7 +121,7 @@ class shell:
             cmd = docker.shellcmd(
                 docker_img, cmd, args,
                 shell_executable=cls._process_args["executable"],
-                container_workdir=shadow_dir) # WTF TODO is shadow_dir
+                container_workdir=shadow_dir)
             logger.info(
                 "Activating docker image {}".format(docker_img))
         if conda_env:

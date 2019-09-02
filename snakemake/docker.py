@@ -99,7 +99,8 @@ def shellcmd(img_path, cmd, args="", envvars=None,
     #                        for k, v in envvars.items())
     # else:
     #     envvars = ""
-
+    if container_workdir is not None:
+        logger.error('--use-docker do not support shadow dir, TO BE IMPLEMENTED')
     # We will handle HERE occam based on an env variable to avoid code duplication 
     if shell_executable is None:
         shell_executable = "sh"
@@ -108,14 +109,15 @@ def shellcmd(img_path, cmd, args="", envvars=None,
         # because we cannot be sure where it is located in the container.
         shell_executable = os.path.split(shell_executable)[-1]
 
+    # TODO add uid
+
     # mount host snakemake module into container
     # why this is needed? TODO
     args += " -v {}:{}".format(SNAKEMAKE_SEARCHPATH, SNAKEMAKE_MOUNTPOINT)
-    # TODO we need to mount current dir or do we leave it to the user? user for now
-    print("*********************",container_workdir)
-    if container_workdir:
-        args += " -w {}".format(container_workdir)
-
+    # TODO we need to mount current dir or do we leave it to the user? user for now, need to mount whole bioinfo_root/equivalent
+    wd = os.getcwd() # this won't work for subworkflows? TODO
+    print("*********************",wd)
+    cmd = "cd {};".format(wd) + cmd;
     cmd = "docker run {} {} {} -c '{}'".format(
         args, img_path, shell_executable,
         cmd.replace("'", r"'\''"))
