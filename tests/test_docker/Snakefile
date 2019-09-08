@@ -1,0 +1,28 @@
+rule c:
+    output: "test2.out"
+    docker: "python:3.8.0b4-alpine3.10"
+    script: "test.py"
+ 
+
+# run rules does not make sense with docker/singularity/blah
+rule d:
+    output: "test3.out"
+    run:
+        with open(output[0], 'w') as o:
+            o.write('test')
+rule a:
+    input:
+        "test.txt"
+    output:
+        "test.out"
+    docker:
+        "centos"
+    shell:
+        'pwd; echo ciao > {output}'
+
+
+rule b:
+    output:
+        "test.txt"
+    shell:
+        "touch {output}"
