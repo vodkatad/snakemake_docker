@@ -411,12 +411,9 @@ class Benchmark(RuleKeywordState):
 class Conda(RuleKeywordState):
     pass
 
-
-# STUDY
 class Singularity(RuleKeywordState):
     pass
 
-# STUDY
 class Docker_img(RuleKeywordState):
     pass
 
@@ -596,7 +593,7 @@ class Rule(GlobalKeywordState):
                        benchmark=Benchmark,
                        conda=Conda,
                        singularity=Singularity,
-                       docker_img = Docker_img,
+                       docker = Docker_img,
                        wildcard_constraints=WildcardConstraints,
                        shadow=Shadow,
                        group=Group,
