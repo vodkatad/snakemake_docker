@@ -905,6 +905,7 @@ class Workflow:
                         rule.singularity_img = self.global_singularity_img
 
             if self.use_docker:
+                #invalid_rule = not ruleinfo.shellcmd
                 invalid_rule = not (ruleinfo.script or ruleinfo.shellcmd)
                 if ruleinfo.docker_img:
                     if invalid_rule:

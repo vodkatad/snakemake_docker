@@ -266,8 +266,7 @@ def get_source(path, basedir=None):
 
 def script(path, basedir, input, output, params, wildcards, threads, resources,
            log, config, rulename, conda_env, singularity_img, singularity_args,
-           docker_img, docker_arg,
-           bench_record, jobid, bench_iteration, shadow_dir):
+           bench_record, jobid, bench_iteration, shadow_dir, docker_img, docker_args):
     """
     Load a script from the given basedir + path and execute it.
     Supports Python 3 and R.
@@ -459,6 +458,7 @@ def script(path, basedir, input, output, params, wildcards, threads, resources,
                 # use python from image
                 py_exec = "python"
             # use the same Python as the running process or the one from the environment
+            print("HEREHERE")
             shell("{py_exec} {f.name:q}", bench_record=bench_record)
         elif language == "r":
             if conda_env is not None and "R_LIBS" in os.environ:
