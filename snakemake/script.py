@@ -458,7 +458,6 @@ def script(path, basedir, input, output, params, wildcards, threads, resources,
                 # use python from image
                 py_exec = "python"
             # use the same Python as the running process or the one from the environment
-            print("HEREHERE")
             shell("{py_exec} {f.name:q}", bench_record=bench_record)
         elif language == "r":
             if conda_env is not None and "R_LIBS" in os.environ:

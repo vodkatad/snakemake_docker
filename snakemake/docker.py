@@ -4,6 +4,7 @@ import os
 from urllib.parse import urlparse
 import hashlib
 from distutils.version import LooseVersion
+import re
 
 import snakemake
 from snakemake.conda import Conda
@@ -111,17 +112,25 @@ def shellcmd(img_path, cmd, args="", envvars=None,
 
     # TODO add uid
 
-    # mount host snakemake module into container
-    # why this is needed? TODO
-    args += " -v {}:{}".format(SNAKEMAKE_SEARCHPATH, SNAKEMAKE_MOUNTPOINT)
-    # TODO we need to mount current dir or do we leave it to the user? user for now, need to mount whole bioinfo_root/equivalent
     wd = os.getcwd() # this won't work for subworkflows? TODO
-    print("*********************",wd)
-    args += " --user {}:{} ".format(os.getuid(), os.getgid())
-    cmd = "cd {};".format(wd) + cmd;
-    cmd = "docker run {} {} {} -c '{}'".format(
-        args, img_path, shell_executable,
-        cmd.replace("'", r"'\''"))
+    print("*********************",wd)    
+    if os.environ.get('RUN_ENV') == 'occam':
+        #occam-run -v /home/egrassi:/home/egrassi  egrassi/bit_docker:small sh -c "cd /home/egrassi/bit_docker; bmake test_bmaked"
+        args_v = re.sub('--volume','-v', args)
+        # workaroud for configargparse problem with --docker-args "-v ..." with -v as a snakemake argument
+        cmd = "cd {};".format(wd) + cmd;
+        cmd = "occam-run {} {} {} -c '{}'".format(
+            args_v, img_path, shell_executable,
+            cmd.replace("'", r"'\''"))
+    else:
+        args += " -v {}:{}".format(SNAKEMAKE_SEARCHPATH, SNAKEMAKE_MOUNTPOINT) # TODO try to remove and see what breaks
+        # TODO we need to mount current dir or do we leave it to the user? user for now, need to mount whole bioinfo_root/equivalent
+        args += " --user {}:{} ".format(os.getuid(), os.getgid())
+        cmd = "cd {};".format(wd) + cmd;
+        cmd = "docker run {} {} {} -c '{}'".format(
+            args, img_path, shell_executable,
+            cmd.replace("'", r"'\''"))
+
     logger.debug(cmd)
     return cmd
 

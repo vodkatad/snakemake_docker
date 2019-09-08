@@ -747,7 +747,6 @@ class Workflow:
 
         if print_compilation:
             print(code)
-        print(code)
         
         # insert the current directory into sys.path
         # this allows to import modules from the workflow directory
