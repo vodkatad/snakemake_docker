@@ -20,3 +20,5 @@ dist/
 tests/test*/*
 playground/*
 tutorial/*
+*.tar.gz
+*.deb
