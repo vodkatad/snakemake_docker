@@ -16,9 +16,11 @@ rule a:
     output:
         "test.out"
     docker:
-        "centos"
-    shell:
-        'pwd; echo ciao > {output}'
+        "egrassi/gatk"
+    shell: "pwd"
+	
+
+#'pwd; echo ciao > {output}'
 
 
 rule b:

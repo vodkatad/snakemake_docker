@@ -113,15 +113,22 @@ def shellcmd(img_path, cmd, args="", envvars=None,
     # TODO add uid
 
     wd = os.getcwd() # this won't work for subworkflows? TODO
-    print("*********************",wd)    
+    print("*********************", wd)    
     if os.environ.get('RUN_ENV') == 'occam':
         #occam-run -v /home/egrassi:/home/egrassi  egrassi/bit_docker:small sh -c "cd /home/egrassi/bit_docker; bmake test_bmaked"
+        node = os.environ.get('RUN_NODE')
+        node_cmd = ""
+        if node != None:
+           node_cmd = "-n " + node
         args_v = re.sub('--volume','-v', args)
         # workaroud for configargparse problem with --docker-args "-v ..." with -v as a snakemake argument
-        cmd = "cd {};".format(wd) + cmd;
-        cmd = "occam-run {} {} {} -c '{}'".format(
-            args_v, img_path, shell_executable,
-            cmd.replace("'", r"'\''"))
+        #cmd = "cd {}; ".format(wd) + cmd; not needed
+        cmd = "occam-my-wait {} {} {} {} -c '{}'".format(
+        node_cmd, args_v, img_path, shell_executable,
+        cmd.replace("'", r"'\''"))
+        #cmd = "ssh egrassi@node22 -p 22 {} {} {} -c \"{}\"".format(
+        #    wd, img_path, shell_executable,
+        #    cmd.replace("'", r"'\''"))
     else:
         args += " -v {}:{}".format(SNAKEMAKE_SEARCHPATH, SNAKEMAKE_MOUNTPOINT) # TODO try to remove and see what breaks
         # TODO we need to mount current dir or do we leave it to the user? user for now, need to mount whole bioinfo_root/equivalent
