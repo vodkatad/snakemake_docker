@@ -1,0 +1,21 @@
+# 
+
+# deb cdrom:[Debian GNU/Linux 10.2.0 _Buster_ - Official amd64 NETINST 20191116-09:56]/ buster main
+
+#deb cdrom:[Debian GNU/Linux 10.2.0 _Buster_ - Official amd64 NETINST 20191116-09:56]/ buster main
+
+deb http://debian.mirror.garr.it/debian/ buster main non-free
+deb-src http://debian.mirror.garr.it/debian/ buster main non-free
+
+deb http://security.debian.org/debian-security buster/updates main
+deb-src http://security.debian.org/debian-security buster/updates main
+
+# buster-updates, previously known as 'volatile'
+deb http://debian.mirror.garr.it/debian/ buster-updates main
+deb-src http://debian.mirror.garr.it/debian/ buster-updates main
+
+deb http://debian.mirror.garr.it/debian/ bullseye main
+deb-src http://debian.mirror.garr.it/debian/ bullseye main
+
+deb http://debian.mirror.garr.it/debian/ sid main
+deb-src http://debian.mirror.garr.it/debian/ sid main
