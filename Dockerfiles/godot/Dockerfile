@@ -1,5 +1,5 @@
 FROM debian:buster
-ENV DEBIAN_FRONTEND noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 ENV MINICONDA_VERSION="4.7.12"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -11,7 +11,7 @@ RUN apt-get update --fix-missing && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-SHELL ["/bin/bash", "-c","-l"]
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ############ Clone env
 
@@ -39,27 +39,34 @@ ADD bcl2fastq-2.20.0_comp.tar.gz /opt/
 # bit and common tools
 RUN mkdir /opt/tools
 ADD tools.tar.gz /opt/tools/
+RUN chmod ugo+x /opt/tools/*
 
 # setup path for everyone
 ENV PATH /opt/tools:/opt/bcftools/bin:/opt/R/R-3.6.3_X11/bin:/opt/bcl2fastq-2.20.0/bin/:${PATH}
+
+# user
+RUN useradd -rm -d /home/turbo -s /bin/bash -u 1001 turbo && echo "turbo:turb4MENTO!" | chpasswd
+#RUN echo "turbo:turbo" | chpasswd
 
 ############ RStudio
 COPY rstudio-server-1.2.5033-amd64.deb /tmp/
 RUN dpkg -i rstudio-server-1.2.5033-amd64.deb
 COPY rserver.conf /etc/rstudio/
+RUN cd /usr/bin && ln -s /bin/sed sed
 
 ############ To setup conda:
-RUN wget -O miniconda.sh https://repo.anaconda.com/miniconda/Miniconda2-${MINICONDA_VERSION}-Linux-x86_64.sh 
-RUN chmod ugo+x miniconda.sh 
+#RUN wget -O miniconda.sh https://repo.anaconda.com/miniconda/Miniconda2-${MINICONDA_VERSION}-Linux-x86_64.sh 
+#RUN chmod ugo+x miniconda.sh 
 
-RUN ./miniconda.sh -b -p /opt/conda && \
-    rm miniconda.sh && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/profile
+#RUN ./miniconda.sh -b -p /opt/conda && \
+#    rm miniconda.sh && \
+#    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+#    echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/profile
 
 
-RUN conda config --add channels bioconda && conda config --add channels conda-forge
-ENV PATH /opt/conda/bin:${PATH}
+# Does not find conda binary?
+#RUN conda config --add channels bioconda && conda config --add channels conda-forge
+#ENV PATH /opt/conda/bin:${PATH} 
 
 # example conda env to be activated by default - I'd produce a docker image for each conda env we need
 #RUN conda create -n ${CONDA_ENV_NAME} bcftools=1.9 bedtools=2.27 picard=2.18.15 samtools=1.9 trimmomatic=0.38  ucsc-liftover=357 bwa=0.7.17 fastqc=0.11.7 mosdepth=0.2.3 ensembl-vep=94.5 python=3.7.3
@@ -69,4 +76,6 @@ ENV PATH /opt/conda/bin:${PATH}
 #ENV CONDA_DEFAULT_ENV $CONDA_ENV_NAME
 #ENV CONDA_PREFIX /opt/conda/envs/$CONDA_ENV_NAME
 
+USER turbo
+WORKDIR /home/turbo
 CMD ["/bin/bash"]
