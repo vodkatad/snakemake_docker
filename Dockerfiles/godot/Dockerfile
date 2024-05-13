@@ -76,6 +76,11 @@ RUN cd /usr/bin && ln -s /bin/sed sed
 #ENV CONDA_DEFAULT_ENV $CONDA_ENV_NAME
 #ENV CONDA_PREFIX /opt/conda/envs/$CONDA_ENV_NAME
 
+# parallel was missing, adding here to avoid having to re-build everything. FIXME for efficiency
+RUN apt-get install -y parallel
+
+# this is needed to run our pipeline who expect some base directories (such as task/annoations) to be defined in env vars
+ENV SNAKE_ROOT="/mnt/trcanmed/snaketree"
 USER turbo
 WORKDIR /home/turbo
 CMD ["/bin/bash"]
