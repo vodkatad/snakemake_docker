@@ -2,7 +2,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python >=3.5
+  - python <=3.9
   - boto3
   - datrie
   - moto >=1.0.1
